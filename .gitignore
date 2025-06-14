@@ -1,0 +1,12 @@
+# build artifacts
+/build/
+/extern/openFrameworks/libs/openFrameworksCompiled/
+/*.tar.bz2
+*.o
+*.a
+*.so
+*.log
+
+# editor files
+.vscode/
+.idea/
