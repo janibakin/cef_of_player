@@ -1,0 +1,4 @@
+[submodule "extern/openFrameworks"]
+	path = extern/openFrameworks
+	url = https://github.com/openframeworks/openFrameworks.git
+	branch = patch-release
