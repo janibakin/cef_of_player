@@ -8,6 +8,7 @@ public:
     void draw() override;
 
 private:
-    float x = 0.f;
-    float v = 4.f;
+    glm::vec2 position;
+    glm::vec2 velocity;
+    float radius = 20.0f;
 };
