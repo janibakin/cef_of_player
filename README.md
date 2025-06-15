@@ -8,7 +8,7 @@ It draws a bouncing ball and serves as a starter for embedding Chromium (CEF).
 ## 1  Clone
 
 ```
-git clone --recurse-submodules https://github.com/janibakin/cef_of_player.git
+git clone https://github.com/janibakin/cef_of_player.git
 cd cef_of_player
 ```
 ## 2 Download openFrameworks binary libs (one-time, ≈450 MB)
