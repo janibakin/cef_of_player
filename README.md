@@ -14,8 +14,8 @@ cd cef_of_player
 ## 2 Download openFrameworks binary libs (one-time, ≈450 MB)
 ```
 cd extern/openFrameworks
-wget -c https://github.com/openframeworks/openFrameworks/releases/download/0.12.1/of_v0.12.1_linux64gcc6_release.tar.bz2
-tar -xjf of_v0.12.1_linux64gcc6_release.tar.bz2 --strip-components=1
+wget -c https://github.com/openframeworks/openFrameworks/releases/download/0.12.1/of_v0.12.1_linux64_gcc6_release.tar.gz
+tar -xjf of_v0.12.1_linux64_gcc6_release.tar.gz --strip-components=1
 cd ../../
 ```
 ## 3 Install build dependencies (Ubuntu 24.04)
