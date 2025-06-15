@@ -1,6 +1,6 @@
 # 🎥 cef_of_player
 
-Minimal C++ demo that uses **openFrameworks 0.12.1** (patch-release) under **CMake/Ninja**.  
+Minimal C++ demo that uses **openFrameworks 0.12.1** under **CMake/Ninja**.
 It draws a bouncing ball and serves as a starter for embedding Chromium (CEF).
 
 ---
@@ -13,9 +13,11 @@ cd cef_of_player
 ```
 ## 2 Download openFrameworks binary libs (one-time, ≈450 MB)
 ```
+mkdir -p extern/openFrameworks
 cd extern/openFrameworks
 wget -c https://github.com/openframeworks/openFrameworks/releases/download/0.12.1/of_v0.12.1_linux64_gcc6_release.tar.gz
-tar -xjf of_v0.12.1_linux64_gcc6_release.tar.gz --strip-components=1
+tar xjv of_v0.12.1_linux64_gcc6_release.tar.gz --strip-components=1
+rm -rf of_v0.12.1_linux64_gcc6_release.tar.gz
 cd ../../
 ```
 ## 3 Install build dependencies (Ubuntu 24.04)

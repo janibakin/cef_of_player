@@ -1,7 +1,7 @@
 # build artifacts
 /build/
-/extern/openFrameworks/libs/openFrameworksCompiled/
-/*.tar.bz2
+/extern/
+/*.tar.gz
 *.o
 *.a
 *.so
