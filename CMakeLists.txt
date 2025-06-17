@@ -90,8 +90,33 @@ set_target_properties(simpleapp PROPERTIES
 target_include_directories(simpleapp PRIVATE
     ${CEF_ROOT}/include
     ${CEF_ROOT}
+    ${OF_ROOT}/libs/openFrameworks
+    ${OF_ROOT}/libs/openFrameworks/app
+    ${OF_ROOT}/libs/openFrameworks/communication
+    ${OF_ROOT}/libs/openFrameworks/graphics
+    ${OF_ROOT}/libs/openFrameworks/math
+    ${OF_ROOT}/libs/openFrameworks/sound
+    ${OF_ROOT}/libs/openFrameworks/types
+    ${OF_ROOT}/libs/openFrameworks/utils
+    ${OF_ROOT}/libs/openFrameworks/video
+    ${OF_ROOT}/libs/openFrameworks/events
+    ${OF_ROOT}/libs/openFrameworks/3d
+    ${OF_ROOT}/libs/openFrameworks/gl
     ${OF_ROOT}/libs
     ${OF_ROOT}/addons
+    ${OF_ROOT}/libs/tess2/include
+    ${OF_ROOT}/libs/glm/include
+    ${OF_ROOT}/libs/utf8/include
+    ${OF_ROOT}/libs/pugixml/include
+    ${OF_ROOT}/libs/fmtlib/include
+    ${OF_ROOT}/libs/FreeImage/include
+    ${OF_ROOT}/libs/freetype/include
+    ${OF_ROOT}/libs/freetype/include/freetype2
+    ${OF_ROOT}/libs/boost/include
+    ${OF_ROOT}/libs/openssl/include
+    ${OF_ROOT}/libs/poco/include
+    ${OF_ROOT}/libs/rtAudio/include
+    ${OF_ROOT}/libs/uriparser/include
 )
 
 target_link_libraries(simpleapp PRIVATE

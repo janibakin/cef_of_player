@@ -2,7 +2,7 @@
 // reserved. Use of this source code is governed by a BSD-style license that
 // can be found in the LICENSE file.
 
-#include "tests/cefsimple/simple_handler.h"
+#include "simple_handler.h"
 
 #if defined(CEF_X11)
 #include <X11/Xatom.h>
