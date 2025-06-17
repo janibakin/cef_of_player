@@ -4,7 +4,7 @@ project(cef_of_player LANGUAGES CXX)
 # --------------------------------------------------------------
 # Paths
 # --------------------------------------------------------------
-set(OF_ROOT ${CMAKE_SOURCE_DIR}/extern/openFrameworks)
+set(OF_ROOT ${CMAKE_SOURCE_DIR}/third_party/openFrameworks)
 set(OF_LIB  ${OF_ROOT}/libs/openFrameworksCompiled/lib/linux64/libopenFrameworks.a)
 
 include(ProcessorCount)

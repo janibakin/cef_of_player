@@ -37,7 +37,7 @@ sudo apt install -y \
 ```
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j$(nproc)
-./build/bin/cef_of          # ⇒ red ball bouncing
+./build/bin/cef_of
 ```
 
 ## 5 Repo layout

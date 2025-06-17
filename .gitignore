@@ -1,7 +1,7 @@
 # build artifacts
 /build/
-/extern/
-/*.tar.gz
+/third_party/
+*.tar.gz
 *.o
 *.a
 *.so
