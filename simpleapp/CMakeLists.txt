@@ -28,10 +28,10 @@ set_target_properties(simpleapp PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )
 
-# ---- Copy the CEF runtime after every build ----------------
+# ---- Copy the CEF runtime and video after every build ----------------
 add_custom_command(TARGET simpleapp POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy_directory
-          "${CEF_ROOT}/Release" "$<TARGET_FILE_DIR:simpleapp>"
-  COMMAND ${CMAKE_COMMAND} -E copy_directory
-          "${CEF_ROOT}/Resources" "$<TARGET_FILE_DIR:simpleapp>"
+COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CEF_ROOT}/Release" "$<TARGET_FILE_DIR:simpleapp>"
+COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CEF_ROOT}/Resources" "$<TARGET_FILE_DIR:simpleapp>"
 )

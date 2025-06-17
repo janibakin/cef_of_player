@@ -169,4 +169,6 @@ target_compile_features(simpleapp PRIVATE cxx_std_17)
 add_custom_command(TARGET simpleapp POST_BUILD
   COMMAND ${CMAKE_COMMAND} -E copy_directory "${CEF_ROOT}/Release"   "$<TARGET_FILE_DIR:simpleapp>"
   COMMAND ${CMAKE_COMMAND} -E copy_directory "${CEF_ROOT}/Resources" "$<TARGET_FILE_DIR:simpleapp>"
+  COMMAND ${CMAKE_COMMAND} -E make_directory "$<TARGET_FILE_DIR:simpleapp>/data"
+  COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_SOURCE_DIR}/media/video.mp4" "$<TARGET_FILE_DIR:simpleapp>/data/video.mp4"
 )
