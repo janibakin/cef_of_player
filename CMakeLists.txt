@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 3.22)
-project(cef_of_player LANGUAGES CXX)
+project(cef_of_app LANGUAGES C CXX)
 
-# --------------------------------------------------------------
-# Paths
-# --------------------------------------------------------------
-set(OF_ROOT ${CMAKE_SOURCE_DIR}/third_party/openFrameworks)
-set(OF_LIB  ${OF_ROOT}/libs/openFrameworksCompiled/lib/linux64/libopenFrameworks.a)
+# -------------------------------
+# openFrameworks Setup
+# -------------------------------
+set(OF_ROOT "${CMAKE_SOURCE_DIR}/third_party/openFrameworks")
+set(OF_LIB  "${OF_ROOT}/libs/openFrameworksCompiled/lib/linux64/libopenFrameworks.a")
 
 include(ProcessorCount)
 ProcessorCount(NPROC)
@@ -14,10 +14,6 @@ if(NOT NPROC)
 endif()
 
 include(ExternalProject)
-
-# --------------------------------------------------------------
-# Build openFrameworks core (uses the libs we unpacked manually)
-# --------------------------------------------------------------
 ExternalProject_Add(openframeworks_build
     SOURCE_DIR        ${OF_ROOT}
     BUILD_IN_SOURCE   1
@@ -31,57 +27,35 @@ add_library(of::openframeworks STATIC IMPORTED GLOBAL)
 add_dependencies(of::openframeworks openframeworks_build)
 set_target_properties(of::openframeworks PROPERTIES
     IMPORTED_LOCATION             ${OF_LIB}
-    INTERFACE_INCLUDE_DIRECTORIES "${OF_ROOT}/libs;${OF_ROOT}/addons")
-
-# --------------------------------------------------------------
-# Your application target
-# --------------------------------------------------------------
-file(GLOB APP_SOURCES CONFIGURE_DEPENDS src/*.cpp src/*.h)
-add_executable(cef_of ${APP_SOURCES})
-set_target_properties(cef_of PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
-# Include openFrameworks headers
-target_include_directories(cef_of PRIVATE
-    ${OF_ROOT}/libs/openFrameworks
-    ${OF_ROOT}/libs/openFrameworks/app
-    ${OF_ROOT}/libs/openFrameworks/communication
-    ${OF_ROOT}/libs/openFrameworks/graphics
-    ${OF_ROOT}/libs/openFrameworks/math
-    ${OF_ROOT}/libs/openFrameworks/sound
-    ${OF_ROOT}/libs/openFrameworks/types
-    ${OF_ROOT}/libs/openFrameworks/utils
-    ${OF_ROOT}/libs/openFrameworks/video
-    ${OF_ROOT}/libs/openFrameworks/events
-    ${OF_ROOT}/libs/openFrameworks/3d
-    ${OF_ROOT}/libs/openFrameworks/gl
-    ${OF_ROOT}/libs
-    ${OF_ROOT}/addons
-    ${OF_ROOT}/libs/tess2/include
-    ${OF_ROOT}/libs/glm/include
-    ${OF_ROOT}/libs/utf8/include
-    ${OF_ROOT}/libs/pugixml/include
-    ${OF_ROOT}/libs/fmtlib/include
-    ${OF_ROOT}/libs/FreeImage/include
-    ${OF_ROOT}/libs/freetype/include
-    ${OF_ROOT}/libs/freetype/include/freetype2
-    ${OF_ROOT}/libs/boost/include
-    ${OF_ROOT}/libs/openssl/include
-    ${OF_ROOT}/libs/poco/include
-    ${OF_ROOT}/libs/rtAudio/include
-    ${OF_ROOT}/libs/uriparser/include
+    INTERFACE_INCLUDE_DIRECTORIES "${OF_ROOT}/libs;${OF_ROOT}/addons"
 )
 
-# --------------------------------------------------------------
-# External dependencies
-# --------------------------------------------------------------
+# -------------------------------
+# CEF Setup
+# -------------------------------
+set(CEF_ROOT "${CMAKE_SOURCE_DIR}/third_party/cef_binary")
+list(APPEND CMAKE_MODULE_PATH "${CEF_ROOT}/cmake")
+find_package(CEF REQUIRED)
+
+add_subdirectory(${CEF_LIBCEF_DLL_WRAPPER_PATH} libcef_dll_wrapper)
+
+add_library(libcef SHARED IMPORTED GLOBAL)
+set_target_properties(libcef PROPERTIES
+    IMPORTED_LOCATION "${CEF_ROOT}/Release/libcef.so"
+)
+
+file(COPY "${CEF_ROOT}/Resources/icudtl.dat" DESTINATION "${CEF_ROOT}/Release")
+file(COPY "${CEF_ROOT}/Resources/locales"     DESTINATION "${CEF_ROOT}/Release")
+
+# -------------------------------
+# External Dependencies
+# -------------------------------
 find_package(Freetype REQUIRED)
-find_package(OpenGL REQUIRED)
-find_package(GLEW   REQUIRED)
-find_package(OpenAL REQUIRED)
-find_package(X11    REQUIRED)
-find_package(Threads REQUIRED)
-find_package(GLUT REQUIRED)
+find_package(OpenGL   REQUIRED)
+find_package(GLEW     REQUIRED)
+find_package(OpenAL   REQUIRED)
+find_package(GLUT     REQUIRED)
+find_package(Threads  REQUIRED)
 find_package(nlohmann_json REQUIRED)
 
 find_package(PkgConfig REQUIRED)
@@ -96,21 +70,46 @@ pkg_check_modules(SNDFILE   REQUIRED sndfile)
 pkg_check_modules(CURL      REQUIRED libcurl)
 pkg_check_modules(URIPARSER REQUIRED liburiparser)
 pkg_check_modules(KISSFFT   REQUIRED kissfft-float)
+pkg_check_modules(X11       REQUIRED x11)
 
-# --------------------------------------------------------------
-# Linking everything together
-# --------------------------------------------------------------
-target_link_libraries(cef_of PRIVATE
+# -------------------------------
+# Application Target
+# -------------------------------
+file(GLOB APP_SOURCES CONFIGURE_DEPENDS
+    "${CMAKE_SOURCE_DIR}/simpleapp/*.cpp"
+    "${CMAKE_SOURCE_DIR}/simpleapp/*.cc"
+    "${CMAKE_SOURCE_DIR}/simpleapp/*.h"
+)
+
+add_executable(simpleapp ${APP_SOURCES})
+set_target_properties(simpleapp PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+    BUILD_RPATH "$ORIGIN"
+)
+
+target_include_directories(simpleapp PRIVATE
+    ${CEF_ROOT}/include
+    ${CEF_ROOT}
+    ${OF_ROOT}/libs
+    ${OF_ROOT}/addons
+)
+
+target_link_libraries(simpleapp PRIVATE
+    libcef_dll_wrapper
+    libcef
     of::openframeworks
-    ${OF_ROOT}/libs/tess2/lib/linux64/libtess2.a
 
+    ${OF_ROOT}/libs/tess2/lib/linux64/libtess2.a
+    freeimage
+    nlohmann_json::nlohmann_json
+    Freetype::Freetype
     OpenGL::GL
     GLEW::GLEW
     OpenAL::OpenAL
     GLUT::GLUT
-    freeimage
-    nlohmann_json::nlohmann_json
-    Freetype::Freetype
+    Threads::Threads
+
+    ${X11_LIBRARIES}
     ${FONTCONFIG_LIBRARIES}
     ${GLFW_LIBRARIES}
     ${GLIB_LIBRARIES}
@@ -122,11 +121,12 @@ target_link_libraries(cef_of PRIVATE
     ${CURL_LIBRARIES}
     ${URIPARSER_LIBRARIES}
     ${KISSFFT_LIBRARIES}
-    ${X11_LIBRARIES}
-    Threads::Threads
+
 )
 
-target_include_directories(cef_of PRIVATE
+target_include_directories(simpleapp PRIVATE
+    ${X11_INCLUDE_DIRS}
+    ${FONTCONFIG_INCLUDE_DIRS}
     ${GLFW_INCLUDE_DIRS}
     ${GLIB_INCLUDE_DIRS}
     ${GSTREAMER_INCLUDE_DIRS}
@@ -137,8 +137,11 @@ target_include_directories(cef_of PRIVATE
     ${CURL_INCLUDE_DIRS}
     ${URIPARSER_INCLUDE_DIRS}
     ${KISSFFT_INCLUDE_DIRS}
-    ${X11_INCLUDE_DIRS}
-    ${FONTCONFIG_INCLUDE_DIRS}
 )
 
-target_compile_features(cef_of PRIVATE cxx_std_17)
+target_compile_features(simpleapp PRIVATE cxx_std_17)
+
+add_custom_command(TARGET simpleapp POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy_directory "${CEF_ROOT}/Release"   "$<TARGET_FILE_DIR:simpleapp>"
+  COMMAND ${CMAKE_COMMAND} -E copy_directory "${CEF_ROOT}/Resources" "$<TARGET_FILE_DIR:simpleapp>"
+)
