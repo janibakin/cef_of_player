@@ -19,5 +19,6 @@ sudo apt install -y build-essential cmake ninja-build git curl wget pkg-config \
   libfreetype6-dev libfontconfig1-dev librtaudio-dev \
   libfreeimage-dev libjpeg-dev libmpg123-dev libudev-dev\
   libcurl4-openssl-dev liburiparser-dev libfmt-dev \
-  libfontconfig-dev libsndfile-dev libgtk2.0-dev
+  libfontconfig-dev libsndfile-dev libgtk2.0-dev \
+  gstreamer1.0-libav gstreamer1.0-plugins-{base,good,bad,ugly}
 echo "[✓] System dependencies installed."

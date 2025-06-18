@@ -22,5 +22,4 @@ private:
     ofTexture tex;
     std::mutex texMutex;
     ofVideoPlayer video;
-    bool cefShutdown {false};
 };

@@ -2,6 +2,17 @@
 
 ofApp::ofApp(CefMainArgs args) : mainArgs(args) {}
 
+void checkVideoFilePath() {
+    std::string dataPath = ofToDataPath("video.mp4", true);
+    ofLogNotice() << "Resolved video path: " << dataPath;
+
+    if (std::filesystem::exists(dataPath)) {
+        ofLogNotice() << "Video file exists and is accessible.";
+    } else {
+        ofLogError() << "Video file NOT found. Check if it was copied properly.";
+    }
+}
+
 void ofApp::setup() {
     ofSetVerticalSync(true);
     ofBackground(0);
@@ -33,18 +44,17 @@ void ofApp::setup() {
 
     browser = CefBrowserHost::CreateBrowserSync(window_info, client, url, browser_settings, nullptr, nullptr);
 
+
+    checkVideoFilePath();
     // --- Load video (defer play to update()) ---
     if (video.load("video.mp4")) {
         video.setLoopState(OF_LOOP_NORMAL);
     } else {
         ofLogError() << "Failed to load video file: video.mp4";
     }
-
-    cefShutdown = false;
 }
 
 void ofApp::update() {
-    if (cefShutdown) return;
 
     CefDoMessageLoopWork();
 
@@ -55,7 +65,6 @@ void ofApp::update() {
 }
 
 void ofApp::draw() {
-    if (cefShutdown) return;
 
     int w = ofGetWidth();
     int h = ofGetHeight();
@@ -88,7 +97,6 @@ void ofApp::windowResized(int w, int h) {
 }
 
 void ofApp::exit() {
-    cefShutdown = true;
 
     if (video.isLoaded()) {
         video.stop();
