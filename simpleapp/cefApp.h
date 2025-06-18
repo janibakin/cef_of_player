@@ -1,12 +1,15 @@
 #pragma once
+
 #include "ofMain.h"
 #include "ofApp.h"
 #include "include/cef_app.h"
 #include <atomic>
 
 class MyCefApp : public CefApp, public CefBrowserProcessHandler {
-public:
-    CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler() override { return this; }
+ public:
+    CefRefPtr<CefBrowserProcessHandler> GetBrowserProcessHandler() override {
+        return this;
+    }
 
     void OnBeforeCommandLineProcessing(const CefString&, CefRefPtr<CefCommandLine> cmd) override {
         cmd->AppendSwitch("disable-gpu");
@@ -17,8 +20,7 @@ public:
     }
 
     void OnScheduleMessagePumpWork(int64_t delay_ms) override {
-        auto next = std::chrono::steady_clock::now()
-                    + std::chrono::milliseconds(delay_ms);
+        auto next = std::chrono::steady_clock::now() + std::chrono::milliseconds(delay_ms);
         next_pump_.store(next, std::memory_order_relaxed);
     }
 
@@ -30,7 +32,7 @@ public:
 
     IMPLEMENT_REFCOUNTING(MyCefApp);
 
-private:
+ private:
     std::atomic<std::chrono::steady_clock::time_point> next_pump_{
         std::chrono::steady_clock::now()
     };
