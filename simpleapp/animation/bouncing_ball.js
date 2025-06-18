@@ -1,18 +1,41 @@
 const canvas = document.getElementById('c');
 const ctx = canvas.getContext('2d');
-let w = canvas.width, h = canvas.height;
+const wrapper = document.getElementById('canvas-wrapper');
 
-let x = w / 2, y = h / 4, vx = 3, vy = 2, r = 40;
+let x = 0, y = 0, vx = 4, vy = 3;
+const r = 20;
+
+function resizeCanvas() {
+  canvas.width = wrapper.clientWidth;
+  canvas.height = wrapper.clientHeight;
+
+  x = canvas.width / 2;
+  y = canvas.height / 2;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+window.addEventListener('resize', () => {
+  resizeCanvas();
+});
+resizeCanvas();
 
 function loop() {
-    requestAnimationFrame(loop);
-    ctx.clearRect(0, 0, w, h);
-    x += vx; y += vy;
-    if (x < r || x > w - r) vx *= -1;
-    if (y < r || y > h - r) vy *= -1;
-    ctx.fillStyle = '#ff4081';
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2);
-    ctx.fill();
+  requestAnimationFrame(loop);
+
+  const w = canvas.width;
+  const h = canvas.height;
+
+  ctx.clearRect(0, 0, w, h);
+
+  x += vx;
+  y += vy;
+
+  if (x - r < 0 || x + r > w) vx *= -1;
+  if (y - r < 0 || y + r > h) vy *= -1;
+
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fill();
 }
 loop();
