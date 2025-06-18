@@ -1,5 +1,4 @@
 #pragma once
-
 #include "ofMain.h"
 #include "include/cef_app.h"
 #include "simple_client.h"
@@ -12,14 +11,21 @@ public:
     void setup() override;
     void update() override;
     void draw() override;
-    void exit() override;
     void windowResized(int w, int h) override;
+    void exit() override;
 
 private:
+    // CEF
     CefMainArgs mainArgs;
     CefRefPtr<SimpleClient> client;
-    CefRefPtr<CefBrowser> browser;
-    ofTexture tex;
-    std::mutex texMutex;
-    ofVideoPlayer video;
+    CefRefPtr<CefBrowser>   browser;
+    ofTexture               cefTex;
+    std::mutex              texMtx;
+    std::thread             cefLoopThread;
+    std::atomic<bool>       runCefLoop {true};
+
+    // Video
+    ofVideoPlayer           video;
+
+    bool cefShutdown {false};
 };

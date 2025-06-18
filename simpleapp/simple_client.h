@@ -18,6 +18,7 @@ public:
     void OnPaint(CefRefPtr<CefBrowser> browser, PaintElementType type,
                  const CefRenderHandler::RectList& dirtyRects,
                  const void* buffer, int w, int h) override {
+        std::cout << "OnPaint called with buffer size: " << w << "x" << h << std::endl;
         paintCallback(buffer, w, h);
     }
 

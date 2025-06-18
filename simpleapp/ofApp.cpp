@@ -2,105 +2,120 @@
 
 ofApp::ofApp(CefMainArgs args) : mainArgs(args) {}
 
-void checkVideoFilePath() {
-    std::string dataPath = ofToDataPath("video.mp4", true);
-    ofLogNotice() << "Resolved video path: " << dataPath;
-
-    if (std::filesystem::exists(dataPath)) {
-        ofLogNotice() << "Video file exists and is accessible.";
-    } else {
-        ofLogError() << "Video file NOT found. Check if it was copied properly.";
-    }
-}
-
-void ofApp::setup() {
-    ofSetVerticalSync(true);
+//--------------------------------------------------------------
+void ofApp::setup()
+{
     ofBackground(0);
 
-    // --- Initialize CEF ---
+    //----- Init CEF off‑screen --------------------------------
+    // (GPU switches are now injected from MyCefApp in main.cpp)
     CefSettings settings;
     settings.no_sandbox = true;
     settings.windowless_rendering_enabled = true;
-    settings.log_severity = LOGSEVERITY_DISABLE;
+    settings.multi_threaded_message_loop = false;
+
     CefInitialize(mainArgs, settings, nullptr, nullptr);
-
-    int w = ofGetWidth();
-    int h = ofGetHeight() / 2; // use top half for browser
-
-    client = new SimpleClient(w, h, [this](const void* buf, int bw, int bh) {
-        std::scoped_lock lock(texMutex);
-        if (!tex.isAllocated()) tex.allocate(bw, bh, GL_RGBA);
-        tex.loadData((const unsigned char*)buf, bw, bh, GL_BGRA);
+    cefLoopThread = std::thread([this]() {
+        while (runCefLoop.load()) {
+            CefDoMessageLoopWork();
+            std::this_thread::sleep_for(std::chrono::milliseconds(10)); // ~100 fps
+        }
     });
 
-    CefWindowInfo window_info;
-    window_info.SetAsWindowless(0);
+    int w = ofGetWidth();
+    int h = ofGetHeight() / 2;   // top half for CEF
 
-    CefBrowserSettings browser_settings;
-    browser_settings.windowless_frame_rate = 15; // lower FPS to reduce load
+    client = new SimpleClient(w, h,
+        [this](const void* buf, int bw, int bh)
+        {
+            std::scoped_lock lock(texMtx);
+            if (!cefTex.isAllocated()) {
+                std::cout << "[CEF] Allocating texture for " << bw << "x" << bh << std::endl;
+                cefTex.allocate(bw, bh, GL_RGBA);
+            }
+            cefTex.loadData(static_cast<const unsigned char*>(buf), bw, bh, GL_BGRA);
+        });
 
-    std::string localPath = ofToDataPath("bouncing_ball.html", true);
-    std::string url = "file://" + localPath;
+    CefWindowInfo winfo;
+    winfo.SetAsWindowless(0);
 
-    browser = CefBrowserHost::CreateBrowserSync(window_info, client, url, browser_settings, nullptr, nullptr);
+    CefBrowserSettings bsettings;
+    bsettings.windowless_frame_rate = 30;
+
+    // std::string localHtml = ofToDataPath("bouncing_ball.html", true);
+    // std::string url = "file://" + localHtml;
+    std::string url {"https://shadertoy.com"};
+    std::cout << "Loading URL: " << url << std::endl;
+    browser = CefBrowserHost::CreateBrowserSync(winfo, client, url, bsettings, nullptr, nullptr);
+    browser->GetHost()->WasResized();
+    browser->GetHost()->Invalidate(PET_VIEW);
 
 
-    checkVideoFilePath();
-    // --- Load video (defer play to update()) ---
-    if (video.load("video.mp4")) {
+    //----- Load video -----------------------------------------
+    if (!video.load("video.mp4"))
+        ofLogError() << "Failed to load video.mp4";
+    else {
         video.setLoopState(OF_LOOP_NORMAL);
-    } else {
-        ofLogError() << "Failed to load video file: video.mp4";
+        video.play();
     }
 }
 
-void ofApp::update() {
+//--------------------------------------------------------------
+void ofApp::update()
+{
+    if (cefShutdown) return;
+    // CefDoMessageLoopWork();
 
-    CefDoMessageLoopWork();
-
-    if (!video.isPlaying() && video.isLoaded()) {
-        video.play();
-    }
+    // CEF now runs its own message‑pump threads (multi_threaded = true)
     video.update();
 }
 
-void ofApp::draw() {
-
+//--------------------------------------------------------------
+void ofApp::draw()
+{
     int w = ofGetWidth();
     int h = ofGetHeight();
+    int halfH = h / 2;
 
+    // Draw CEF buffer (upper half)
     {
-        std::scoped_lock lock(texMutex);
-        if (tex.isAllocated()) tex.draw(0, 0, w, h / 2);
+        std::scoped_lock lock(texMtx);
+        if (cefTex.isAllocated())
+            cefTex.draw(0, 0, w, halfH);
     }
 
+    // Draw video (original scale, centered bottom half)
     if (video.isLoaded()) {
-        float videoW = video.getWidth();
-        float videoH = video.getHeight();
-        float targetW = w;
-        float targetH = h / 2;
-        float scale = std::min(targetW / videoW, targetH / videoH);
-        float drawW = videoW * scale;
-        float drawH = videoH * scale;
-        float drawX = (targetW - drawW) * 0.5f;
-        float drawY = h / 2 + (targetH - drawH) * 0.5f;
-        video.draw(drawX, drawY, drawW, drawH);
+        float vw = video.getWidth();
+        float vh = video.getHeight();
+        float scale = std::min(static_cast<float>(w) / vw, static_cast<float>(halfH) / vh);
+        float dw = vw * scale;
+        float dh = vh * scale;
+        float dx = (w - dw) * 0.5f;
+        float dy = halfH + (halfH - dh) * 0.5f;
+        video.draw(dx, dy, dw, dh);
     }
 }
 
-void ofApp::windowResized(int w, int h) {
+//--------------------------------------------------------------
+void ofApp::windowResized(int w, int h)
+{
     if (browser) {
         browser->GetHost()->NotifyMoveOrResizeStarted();
-        client->Resize(w, h / 2);
+        client->Resize(w, h/2);
         browser->GetHost()->WasResized();
     }
 }
 
-void ofApp::exit() {
+//--------------------------------------------------------------
+void ofApp::exit()
+{
+    cefShutdown = true;
 
-    if (video.isLoaded()) {
-        video.stop();
-    }
+    runCefLoop.store(false);
+    if (cefLoopThread.joinable()) cefLoopThread.join();
+    
+    if (video.isLoaded()) video.stop();
 
     if (browser) {
         browser->GetHost()->CloseBrowser(true);
