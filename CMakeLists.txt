@@ -123,6 +123,7 @@ target_link_libraries(simpleapp PRIVATE
     libcef_dll_wrapper
     libcef
     of::openframeworks
+    udev
 
     ${OF_ROOT}/libs/tess2/lib/linux64/libtess2.a
     freeimage
