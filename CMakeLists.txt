@@ -5,7 +5,14 @@ project(cef_of_app LANGUAGES C CXX)
 # openFrameworks Setup
 # -------------------------------
 set(OF_ROOT "${CMAKE_SOURCE_DIR}/third_party/openFrameworks")
-set(OF_LIB  "${OF_ROOT}/libs/openFrameworksCompiled/lib/linux64/libopenFrameworks.a")
+if(CMAKE_SYSTEM_PROCESSOR STREQUAL "aarch64")
+    set(OF_PLATFORM_DIR "linuxaarch64")
+elseif(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
+    set(OF_PLATFORM_DIR "linux64")
+else()
+    message(FATAL_ERROR "Unsupported architecture: ${CMAKE_SYSTEM_PROCESSOR}")
+endif()
+set(OF_LIB "${OF_ROOT}/libs/openFrameworksCompiled/lib/${OF_PLATFORM_DIR}/libopenFrameworks.a")
 
 include(ProcessorCount)
 ProcessorCount(NPROC)
@@ -125,7 +132,7 @@ target_link_libraries(simpleapp PRIVATE
     of::openframeworks
     udev
 
-    ${OF_ROOT}/libs/tess2/lib/linux64/libtess2.a
+    ${OF_ROOT}/libs/tess2/lib/${OF_PLATFORM_DIR}/libtess2.a
     freeimage
     nlohmann_json::nlohmann_json
     Freetype::Freetype
