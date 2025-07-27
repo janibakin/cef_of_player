@@ -27,7 +27,7 @@ jobs:
           libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
           libgstreamer-plugins-good1.0-dev \
           libglib2.0-dev libcurl4-openssl-dev \
-          liburiparser-dev libasound2-dev
+          liburiparser-dev libasound2-dev nlohmann-json3-dev
 
     - name: Download OpenFrameworks (x86_64)
       run: |
