@@ -15,19 +15,32 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
-    - name: Install dependencies
+    - name: Install system dependencies
       run: |
+        sudo dpkg --add-architecture i386
         sudo apt-get update
         sudo apt-get install -y \
-          cmake ninja-build build-essential pkg-config \
-          libgl1-mesa-dev libglew-dev libopenal-dev libsndfile1-dev \
-          libx11-dev libxrandr-dev libxi-dev libxcursor-dev libxinerama-dev \
-          libfreetype6-dev freeglut3-dev \
-          libpulse-dev libmpg123-dev libfontconfig1-dev \
-          libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
-          libgstreamer-plugins-good1.0-dev \
-          libglib2.0-dev libcurl4-openssl-dev \
-          liburiparser-dev libasound2-dev nlohmann-json3-dev
+          build-essential cmake ninja-build git curl wget pkg-config \
+          tar bzip2 unzip xz-utils \
+          libgl1-mesa-dev libglu1-mesa-dev \
+          libx11-dev libxinerama-dev libxcursor-dev libxi-dev \
+          libxrandr-dev libxrender-dev libxfixes-dev libxtst-dev \
+          libxcomposite-dev libxdamage-dev libx11-xcb-dev libxcb1-dev \
+          libdrm-dev libgbm-dev mesa-utils \
+          libpulse-dev libasound2-dev \
+          libgtk-3-dev libnss3 libatk1.0-dev libatk-bridge2.0-dev \
+          libcups2-dev libpango1.0-dev libssl-dev \
+          patchelf zsync nlohmann-json3-dev libglew-dev libalut-dev \
+          freeglut3-dev libglfw3-dev libgstreamer1.0-dev \
+          gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
+          gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly \
+          libopenal-dev libsndfile1-dev kissfft-tools libkissfft-dev \
+          libfreetype6-dev libfontconfig1-dev librtaudio-dev \
+          libfreeimage-dev libjpeg-dev libmpg123-dev libudev-dev \
+          libcurl4-openssl-dev liburiparser-dev libfmt-dev \
+          libfontconfig-dev libsndfile-dev libgtk2.0-dev \
+          gstreamer1.0-libav \
+          libudev1:i386 libudev-dev:i386
 
     - name: Download OpenFrameworks (x86_64)
       run: |
@@ -46,10 +59,10 @@ jobs:
         mv cef_binary_137.0.17+gf354b0e+chromium-137.0.7151.104_linux64_minimal/* .
         rm -rf cef_binary_137.0.17+gf354b0e+chromium-137.0.7151.104_linux64_minimal*
 
-    - name: Build project with CMake + Ninja
+    - name: Configure and build with CMake + Ninja
       run: |
         cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
         cmake --build build --parallel $(nproc)
 
-    - name: List final binary
+    - name: List built output
       run: ls -lh build/bin/simpleapp || echo "Binary not found"
