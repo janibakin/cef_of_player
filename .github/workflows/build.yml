@@ -1,0 +1,55 @@
+name: Build CEF + OF Player (x86_64)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-x86_64:
+    runs-on: ubuntu-latest
+    name: Build on x86_64
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          cmake ninja-build build-essential pkg-config \
+          libgl1-mesa-dev libglew-dev libopenal-dev libsndfile1-dev \
+          libx11-dev libxrandr-dev libxi-dev libxcursor-dev libxinerama-dev \
+          libfreetype6-dev freeglut3-dev \
+          libpulse-dev libmpg123-dev libfontconfig1-dev \
+          libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev \
+          libgstreamer-plugins-good1.0-dev \
+          libglib2.0-dev libcurl4-openssl-dev \
+          liburiparser-dev libasound2-dev
+
+    - name: Download OpenFrameworks (x86_64)
+      run: |
+        mkdir -p third_party/openFrameworks
+        cd third_party/openFrameworks
+        wget -c https://github.com/openframeworks/openFrameworks/releases/download/0.12.1/of_v0.12.1_linux64_gcc6_release.tar.gz
+        tar xvf of_v0.12.1_linux64_gcc6_release.tar.gz --strip-components=1
+        rm -f of_v0.12.1_linux64_gcc6_release.tar.gz
+
+    - name: Download CEF (x86_64)
+      run: |
+        mkdir -p third_party/cef_binary
+        cd third_party/cef_binary
+        wget -c https://cef-builds.spotifycdn.com/cef_binary_137.0.17%2Bgf354b0e%2Bchromium-137.0.7151.104_linux64_minimal.tar.bz2
+        tar xvf cef_binary_137.0.17+gf354b0e+chromium-137.0.7151.104_linux64_minimal.tar.bz2
+        mv cef_binary_137.0.17+gf354b0e+chromium-137.0.7151.104_linux64_minimal/* .
+        rm -rf cef_binary_137.0.17+gf354b0e+chromium-137.0.7151.104_linux64_minimal*
+
+    - name: Build project with CMake + Ninja
+      run: |
+        cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+        cmake --build build --parallel $(nproc)
+
+    - name: List final binary
+      run: ls -lh build/bin/simpleapp || echo "Binary not found"
