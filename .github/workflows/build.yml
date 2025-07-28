@@ -20,6 +20,17 @@ jobs:
         dpkg -l | grep gstreamer
         apt-cache search gstreamer | grep plugins
         pkg-config --list-all | grep gstreamer
+    - name: Debug pkg-config for gstreamer-app
+      run: |
+        pkg-config --modversion gstreamer-app-1.0
+        pkg-config --cflags gstreamer-app-1.0
+        pkg-config --libs gstreamer-app-1.0
+
+    - name: Check gstreamer-app-1.0 pkg-config availability
+      run: |
+        find /usr -name gstreamer-app-1.0.pc
+        export PKG_CONFIG_PATH=/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig
+        pkg-config --modversion gstreamer-app-1.0 || echo "Not found"
 
     - name: Install system dependencies
       run: |
