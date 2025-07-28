@@ -32,7 +32,6 @@ jobs:
           libcups2-dev libpango1.0-dev libssl-dev \
           patchelf zsync nlohmann-json3-dev libglew-dev libalut-dev \
           freeglut3-dev libglfw3-dev libgstreamer1.0-dev \
-          gstreamer-app-1.0 gstreamer-video-1.0 \
           libopenal-dev libsndfile1-dev kissfft-tools libkissfft-dev \
           libfreetype6-dev libfontconfig1-dev librtaudio-dev \
           libfreeimage-dev libjpeg-dev libmpg123-dev libudev-dev \
