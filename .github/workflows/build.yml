@@ -41,7 +41,15 @@ jobs:
           gstreamer1.0-libav libgstreamer-plugins-base1.0-dev \
           libgstreamer-plugins-bad1.0-dev
 
+    - name: Cache third-party binaries
+      id: cache
+      uses: actions/cache@v4
+      with:
+        path: third_party
+        key: third-party-${{ hashFiles('scripts/downloads-version.txt') }}
+
     - name: Download openFrameworks (ARM64)
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         mkdir -p third_party/openFrameworks
         cd third_party/openFrameworks
@@ -51,6 +59,7 @@ jobs:
         cd ../../..
 
     - name: Download CEF (ARM64)
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         mkdir -p third_party/cef_binary
         cd third_party/cef_binary
@@ -63,7 +72,7 @@ jobs:
     - name: Build with CMake + Ninja (ARM64)
       run: |
         cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPROJECT_ARCH=arm64
-        cmake --build build -j$(nproc)
+        cmake --build build -j$(nproc) --verbose
 
     - name: List built output
       run: ls -lh build/bin/simpleapp || echo "Binary not found"
