@@ -24,9 +24,9 @@ COMMON_PACKAGES="build-essential cmake ninja-build git curl wget pkg-config \
   libfontconfig-dev libsndfile-dev libgtk2.0-dev \
   gstreamer1.0-libav"
 
-if [[ "ARCH" == "x86_64" ]]; then
+if [[ "$ARCH" == "x86_64" ]]; then
   EXTRA_PACKAGES="libudev1:i386 libudev-dev:i386"
-elif [[ "ARCH" == "aarch64" ]]; then
+elif [[ "$ARCH" == "aarch64" ]]; then
   EXTRA_PACKAGES="libpugixml-dev"
 else
   EXTRA_PACKAGES=""
