@@ -15,11 +15,18 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v3
 
+    - name: Debug GStreamer pkg-config files
+      run: |
+        dpkg -l | grep gstreamer
+        apt-cache search gstreamer | grep plugins
+        pkg-config --list-all | grep gstreamer
+
     - name: Install system dependencies
       run: |
         sudo dpkg --add-architecture i386
         sudo apt-get update
         sudo apt-get install -y \
+          libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
           build-essential cmake ninja-build git curl wget pkg-config \
           tar bzip2 unzip xz-utils \
           libgl1-mesa-dev libglu1-mesa-dev \
