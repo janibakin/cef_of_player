@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.22)
 project(cef_of_app LANGUAGES C CXX)
 
+message(STATUS "CMAKE_SYSTEM_PROCESSOR = ${CMAKE_SYSTEM_PROCESSOR}")
+message(STATUS "OF_PLATFORM_DIR = ${OF_PLATFORM_DIR}")
+
 # -------------------------------
 # openFrameworks Setup
 # -------------------------------

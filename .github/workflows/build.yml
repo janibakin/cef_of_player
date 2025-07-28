@@ -15,6 +15,9 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Print system processor
+      run: uname -m
+
     - name: Install system dependencies
       run: |
         sudo apt-get update
