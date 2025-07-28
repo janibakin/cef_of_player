@@ -56,7 +56,6 @@ jobs:
         wget -c https://github.com/openframeworks/openFrameworks/releases/download/0.12.1/of_v0.12.1_linuxaarch64_release.tar.gz
         tar xvf of_v0.12.1_linuxaarch64_release.tar.gz --strip-components=1
         rm -f of_v0.12.1_linuxaarch64_release.tar.gz
-        cd ../../..
 
     - name: Download CEF (ARM64)
       if: steps.cache.outputs.cache-hit != 'true'
@@ -67,11 +66,18 @@ jobs:
         tar xvf cef_binary_137.0.17+gf354b0e+chromium-137.0.7151.104_linuxarm64_minimal.tar.bz2
         mv cef_binary_137.0.17+gf354b0e+chromium-137.0.7151.104_linuxarm64_minimal/* .
         rm -rf cef_binary_137.0.17+gf354b0e+chromium-137.0.7151.104_linuxarm64_minimal*
-        cd ../../..
 
-    - name: Build with CMake + Ninja (ARM64)
+    - name: Prep CMake
       run: |
         cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPROJECT_ARCH=arm64
+
+    - name: Check for libtess2.a presence
+      run: |
+        echo "Checking for tess2.a..."
+        find third_party/openFrameworks/libs/tess2 -name libtess2.a || echo "libtess2.a NOT FOUND"
+
+    - name: build with CMake
+      run: |
         cmake --build build -j$(nproc) --verbose
 
     - name: List built output
