@@ -1,4 +1,4 @@
-name: Build CEF + OF Player (ARM64)
+name: Build CEF + OF Player (x86_64)
 
 on:
   push:
@@ -7,19 +7,17 @@ on:
     branches: [ main ]
 
 jobs:
-  build-arm64:
-    runs-on: ubuntu-24.04
-    name: Build on ARM64
+  build-x86_64:
+    runs-on: ubuntu-latest
+    name: Build on x86_64
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
-
-    - name: Print system processor
-      run: uname -m
+      uses: actions/checkout@v3
 
     - name: Install system dependencies
       run: |
+        sudo dpkg --add-architecture i386
         sudo apt-get update
         sudo apt-get install -y \
           build-essential cmake ninja-build git curl wget pkg-config \
@@ -34,54 +32,41 @@ jobs:
           libcups2-dev libpango1.0-dev libssl-dev \
           patchelf zsync nlohmann-json3-dev libglew-dev libalut-dev \
           freeglut3-dev libglfw3-dev libgstreamer1.0-dev \
-          gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
-          gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly \
+          libgstreamer-plugins-base1.0-dev \
+          libgstreamer-plugins-good1.0-dev \
+          libgstreamer-plugins-bad1.0-dev \
+          libgstreamer-plugins-ugly1.0-dev \
+          libgstreamer-app-1.0-dev \
+          libgstreamer-video-1.0-dev \
           libopenal-dev libsndfile1-dev kissfft-tools libkissfft-dev \
           libfreetype6-dev libfontconfig1-dev librtaudio-dev \
           libfreeimage-dev libjpeg-dev libmpg123-dev libudev-dev \
           libcurl4-openssl-dev liburiparser-dev libfmt-dev \
-          libfontconfig-dev libsndfile-dev libgtk2.0-dev libpugixml-dev \
-          gstreamer1.0-libav libgstreamer-plugins-base1.0-dev \
-          libgstreamer-plugins-bad1.0-dev
+          libfontconfig-dev libsndfile-dev libgtk2.0-dev \
+          gstreamer1.0-libav \
+          libudev1:i386 libudev-dev:i386
 
-    - name: Cache third-party binaries
-      id: cache
-      uses: actions/cache@v4
-      with:
-        path: third_party
-        key: third-party-${{ hashFiles('scripts/downloads-version.txt') }}
-
-    - name: Download openFrameworks (ARM64)
-      if: steps.cache.outputs.cache-hit != 'true'
+    - name: Download OpenFrameworks (x86_64)
       run: |
         mkdir -p third_party/openFrameworks
         cd third_party/openFrameworks
-        wget -c https://github.com/openframeworks/openFrameworks/releases/download/0.12.1/of_v0.12.1_linuxaarch64_release.tar.gz
-        tar xvf of_v0.12.1_linuxaarch64_release.tar.gz --strip-components=1
-        rm -f of_v0.12.1_linuxaarch64_release.tar.gz
+        wget -c https://github.com/openframeworks/openFrameworks/releases/download/0.12.1/of_v0.12.1_linux64_gcc6_release.tar.gz
+        tar xvf of_v0.12.1_linux64_gcc6_release.tar.gz --strip-components=1
+        rm -f of_v0.12.1_linux64_gcc6_release.tar.gz
 
-    - name: Download CEF (ARM64)
-      if: steps.cache.outputs.cache-hit != 'true'
+    - name: Download CEF (x86_64)
       run: |
         mkdir -p third_party/cef_binary
         cd third_party/cef_binary
-        wget -c https://cef-builds.spotifycdn.com/cef_binary_137.0.17+gf354b0e+chromium-137.0.7151.104_linuxarm64_minimal.tar.bz2
-        tar xvf cef_binary_137.0.17+gf354b0e+chromium-137.0.7151.104_linuxarm64_minimal.tar.bz2
-        mv cef_binary_137.0.17+gf354b0e+chromium-137.0.7151.104_linuxarm64_minimal/* .
-        rm -rf cef_binary_137.0.17+gf354b0e+chromium-137.0.7151.104_linuxarm64_minimal*
+        wget -c https://cef-builds.spotifycdn.com/cef_binary_137.0.17%2Bgf354b0e%2Bchromium-137.0.7151.104_linux64_minimal.tar.bz2
+        tar xvf cef_binary_137.0.17+gf354b0e+chromium-137.0.7151.104_linux64_minimal.tar.bz2
+        mv cef_binary_137.0.17+gf354b0e+chromium-137.0.7151.104_linux64_minimal/* .
+        rm -rf cef_binary_137.0.17+gf354b0e+chromium-137.0.7151.104_linux64_minimal*
 
-    - name: Prep CMake
+    - name: Configure and build with CMake + Ninja
       run: |
-        cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPROJECT_ARCH=arm64
-
-    - name: Check for libtess2.a presence
-      run: |
-        echo "Checking for tess2.a..."
-        find third_party/openFrameworks/libs/tess2 -name libtess2.a || echo "libtess2.a NOT FOUND"
-
-    - name: build with CMake
-      run: |
-        cmake --build build -j$(nproc) --verbose
+        cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+        cmake --build build --parallel $(nproc)
 
     - name: List built output
       run: ls -lh build/bin/simpleapp || echo "Binary not found"
